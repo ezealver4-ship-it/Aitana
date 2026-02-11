@@ -1,206 +1,260 @@
 # Aitana
 El mundo de aitana
-index.htlm
 <!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Luna Aitana</title>
+<title>Universo de Luna Aitana</title>
+
 <style>
-body{margin:0;overflow:hidden;background:black;font-family:Arial;color:white}
-#entrada{
-position:fixed;width:100%;height:100%;
-background:black;display:flex;
-flex-direction:column;justify-content:center;
-align-items:center;z-index:10;text-align:center;
+body{
+margin:0;
+overflow:hidden;
+background:black;
+font-family:Arial, sans-serif;
+color:white;
 }
-#entrada h1{font-size:24px;margin-bottom:25px}
-#entrada button{
-padding:15px 30px;font-size:18px;
-border:none;border-radius:10px;
-background:#ff66b2;color:white
+
+/* FONDO ESTRELLAS */
+#estrellas{
+position:fixed;
+width:100%;
+height:100%;
+background:black;
+overflow:hidden;
+z-index:0;
 }
-#mensaje{
-position:fixed;top:20px;width:100%;
-text-align:center;font-size:22px;
-opacity:0;transition:2s;
-pointer-events:none
+
+.estrella{
+position:absolute;
+width:2px;
+height:2px;
+background:white;
+border-radius:50%;
+opacity:0.8;
+animation:parpadeo 2s infinite alternate;
 }
+
+@keyframes parpadeo{
+from{opacity:0.3;}
+to{opacity:1;}
+}
+
+/* PANTALLA INICIO */
+#inicio{
+position:fixed;
+width:100%;
+height:100%;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+z-index:10;
+background:rgba(0,0,0,0.9);
+text-align:center;
+}
+
+#inicio h1{
+font-size:22px;
+margin-bottom:20px;
+}
+
+#abrirBtn{
+padding:15px 25px;
+font-size:18px;
+border:none;
+border-radius:30px;
+background:#ff4da6;
+color:white;
+}
+
+/* UNIVERSO */
+#universo{
+position:absolute;
+width:100%;
+height:100%;
+display:none;
+overflow:hidden;
+touch-action:none;
+z-index:1;
+}
+
+/* NOMBRE CENTRAL ORBITANDO */
+#nombreOrbita{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+width:200px;
+height:200px;
+animation:rotar 20s linear infinite;
+}
+
+#nombreOrbita span{
+position:absolute;
+width:100%;
+text-align:center;
+top:0;
+font-size:18px;
+color:#ffccff;
+}
+
+/* ORBITAS FOTOS */
+.orbita{
+position:absolute;
+top:50%;
+left:50%;
+transform-origin:center center;
+animation:rotar linear infinite;
+}
+
+.foto{
+position:absolute;
+width:90px;
+height:90px;
+border-radius:50%;
+object-fit:cover;
+cursor:pointer;
+}
+
+/* MODAL */
 #modal{
-position:fixed;width:100%;height:100%;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
 background:rgba(0,0,0,0.95);
-display:none;justify-content:center;
-align-items:center;flex-direction:column;
-z-index:20
+display:none;
+justify-content:center;
+align-items:center;
+z-index:20;
 }
-#modal img,#modal video{
-max-width:90%;max-height:80%;
-border-radius:15px
+
+#modal img{
+max-width:90%;
+max-height:90%;
+border-radius:20px;
 }
-#cerrar{
-margin-top:20px;padding:10px 20px;
-background:#ff66b2;border:none;
-color:white;border-radius:10px
+
+@keyframes rotar{
+from{transform:rotate(0deg);}
+to{transform:rotate(360deg);}
 }
 </style>
 </head>
+
 <body>
 
-<div id="entrada">
+<div id="estrellas"></div>
+
+<div id="inicio">
 <h1>¿Quieres conocer mi universo?</h1>
-<button onclick="start()">Toca para abrir</button>
+<button id="abrirBtn">Tocar para abrir</button>
 </div>
 
-<div id="mensaje">✨ Mi mundo entero ✨</div>
+<div id="universo">
 
-<div id="modal">
-<div id="contenido"></div>
-<button id="cerrar" onclick="cerrar()">Cerrar</button>
+<div id="nombreOrbita">
+<span>Luna Aitana</span>
 </div>
 
-<audio id="musica" loop src="musica.mp3"></audio>
+</div>
 
-<script type="module">
+<div id="modal" onclick="cerrarModal()">
+<img id="imgGrande">
+</div>
 
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.module.js";
-import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.158.0/examples/jsm/controls/OrbitControls.js";
+<audio id="musica" src="musica.mp3"></audio>
 
-let scene,camera,renderer,controls;
-let objetos=[];
-let raycaster=new THREE.Raycaster();
-let mouse=new THREE.Vector2();
-let clickable=[];
+<script>
 
-window.start=function(){
-document.getElementById("entrada").style.display="none";
+/* CREAR ESTRELLAS */
+const estrellas = document.getElementById("estrellas");
+for(let i=0;i<200;i++){
+let star=document.createElement("div");
+star.className="estrella";
+star.style.top=Math.random()*100+"%";
+star.style.left=Math.random()*100+"%";
+star.style.animationDuration=(1+Math.random()*3)+"s";
+estrellas.appendChild(star);
+}
+
+const fotos=[
+"foto1.jpg","foto2.jpg","foto3.jpg",
+"foto4.jpg","foto5.jpg","foto6.jpg",
+"foto7.jpg","foto8.jpg","foto9.jpg"
+];
+
+const universo=document.getElementById("universo");
+
+/* CREAR ORBITAS */
+fotos.forEach((src,i)=>{
+let orbita=document.createElement("div");
+orbita.className="orbita";
+orbita.style.width=(220 + i*40)+"px";
+orbita.style.height=(220 + i*40)+"px";
+orbita.style.marginLeft=-(110 + i*20)+"px";
+orbita.style.marginTop=-(110 + i*20)+"px";
+orbita.style.animationDuration=(25 + i*5)+"s";
+
+let img=document.createElement("img");
+img.src=src;
+img.className="foto";
+img.style.top="0px";
+img.style.left="50%";
+img.style.transform="translateX(-50%)";
+
+img.onclick=()=>abrirModal(src);
+
+orbita.appendChild(img);
+universo.appendChild(orbita);
+});
+
+/* ABRIR UNIVERSO */
+document.getElementById("abrirBtn").onclick=()=>{
+document.getElementById("inicio").style.display="none";
+universo.style.display="block";
 document.getElementById("musica").play();
-init();
-animate();
-}
+};
 
-function init(){
-
-scene=new THREE.Scene();
-
-camera=new THREE.PerspectiveCamera(
-75,window.innerWidth/window.innerHeight,0.1,5000
-);
-camera.position.z=1500;
-
-renderer=new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(window.innerWidth,window.innerHeight);
-document.body.appendChild(renderer.domElement);
-
-controls=new OrbitControls(camera,renderer.domElement);
-controls.enableZoom=true;
-controls.enableDamping=true;
-controls.enabled=false;
-
-/* estrellas */
-const geo=new THREE.BufferGeometry();
-let vertices=[];
-for(let i=0;i<15000;i++){
-vertices.push(
-THREE.MathUtils.randFloatSpread(5000),
-THREE.MathUtils.randFloatSpread(5000),
-THREE.MathUtils.randFloatSpread(5000)
-);
-}
-geo.setAttribute("position",new THREE.Float32BufferAttribute(vertices,3));
-const stars=new THREE.Points(geo,new THREE.PointsMaterial({color:0xffffff,size:1}));
-scene.add(stars);
-
-/* función foto */
-function addFoto(src,size,dist,vel){
-const tex=new THREE.TextureLoader().load(src);
-const mesh=new THREE.Mesh(
-new THREE.SphereGeometry(size,32,32),
-new THREE.MeshBasicMaterial({map:tex})
-);
-mesh.userData={tipo:"foto",src};
-const pivot=new THREE.Object3D();
-scene.add(pivot);
-pivot.add(mesh);
-mesh.position.x=dist;
-objetos.push({pivot,vel});
-clickable.push(mesh);
-}
-
-/* función video */
-function addVideo(src,size,dist,vel){
-const tex=new THREE.TextureLoader().load("foto1.jpg");
-const mesh=new THREE.Mesh(
-new THREE.SphereGeometry(size,32,32),
-new THREE.MeshBasicMaterial({map:tex})
-);
-mesh.userData={tipo:"video",src};
-const pivot=new THREE.Object3D();
-scene.add(pivot);
-pivot.add(mesh);
-mesh.position.x=dist;
-objetos.push({pivot,vel});
-clickable.push(mesh);
-}
-
-/* 9 fotos */
-for(let i=1;i<=9;i++){
-addFoto(`foto${i}.jpg`,12,100+i*40,0.002+(i*0.0002));
-}
-
-/* 4 videos */
-for(let i=1;i<=4;i++){
-addVideo(`video${i}.mp4`,18,500+i*60,0.001);
-}
-
-/* click */
-renderer.domElement.addEventListener("click",e=>{
-mouse.x=(e.clientX/window.innerWidth)*2-1;
-mouse.y=-(e.clientY/window.innerHeight)*2+1;
-raycaster.setFromCamera(mouse,camera);
-let inter=raycaster.intersectObjects(clickable);
-if(inter.length>0){
-let obj=inter[0].object;
-if(obj.userData.tipo==="foto"){
-abrir(`<img src="${obj.userData.src}">`);
-}
-if(obj.userData.tipo==="video"){
-abrir(`<video src="${obj.userData.src}" controls autoplay></video>`);
-}
-}
-});
-
-window.addEventListener("resize",()=>{
-camera.aspect=window.innerWidth/window.innerHeight;
-camera.updateProjectionMatrix();
-renderer.setSize(window.innerWidth,window.innerHeight);
-});
-}
-
-function abrir(html){
-document.getElementById("contenido").innerHTML=html;
+/* MODAL */
+function abrirModal(src){
+document.getElementById("imgGrande").src=src;
 document.getElementById("modal").style.display="flex";
 }
-window.cerrar=function(){
+
+function cerrarModal(){
 document.getElementById("modal").style.display="none";
-document.getElementById("contenido").innerHTML="";
 }
 
-function animate(){
-requestAnimationFrame(animate);
+/* ZOOM */
+let scale=1;
+let startDist=0;
 
-if(camera.position.z>350){
-camera.position.z-=8;
-}else{
-controls.enabled=true;
-document.getElementById("mensaje").style.opacity=1;
+universo.addEventListener("touchstart",e=>{
+if(e.touches.length==2){
+startDist=getDist(e);
 }
+});
 
-objetos.forEach(o=>o.pivot.rotation.y+=o.vel);
-controls.update();
-renderer.render(scene,camera);
+universo.addEventListener("touchmove",e=>{
+if(e.touches.length==2){
+let newDist=getDist(e);
+scale*=newDist/startDist;
+universo.style.transform=`scale(${scale})`;
+startDist=newDist;
+}
+});
+
+function getDist(e){
+let dx=e.touches[0].clientX - e.touches[1].clientX;
+let dy=e.touches[0].clientY - e.touches[1].clientY;
+return Math.sqrt(dx*dx + dy*dy);
 }
 
 </script>
+
 </body>
 </html>
